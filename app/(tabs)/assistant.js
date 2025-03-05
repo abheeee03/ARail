@@ -11,13 +11,9 @@ const systemPrompt = `You are RailMate, an AI assistant specialized in Indian ra
 3. Politely decline to answer questions unrelated to railways
 4. Always respond in a helpful and professional manner`;
 
-
-
 const formatResponseText = (text) => {
-  // Remove unwanted symbols
   text = text.replace(/\*\*/g, '').replace(/\*/g, '');
 
-  // Convert markdown-like formatting to HTML-like tags
   text = text
     .replace(/\n/g, '<br>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -57,6 +53,17 @@ const renderFormattedText = (text) => {
   );
 };
 
+const EmptyChatMessage = () => (
+  <View style={styles.emptyChatContainer}>
+    <View style={styles.dialogueBox}>
+      <MaterialIcons name="train" size={48} color="#007bff" />
+      <Text style={styles.sloganText}>RailMate</Text>
+      <Text style={[styles.sloganText, {fontSize: 18}]}>Your Railway Companion</Text>
+      <Text style={styles.subText}>Ask me anything about Railways!</Text>
+    </View>
+  </View>
+);
+
 const assistant = () => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -94,21 +101,25 @@ const assistant = () => {
       </View>
 
       <ScrollView style={styles.chatContainer}>
-        {messages.map((msg, index) => (
-          <View
-            key={index}
-            style={[
-              styles.message,
-              msg.sender === 'user' ? styles.userMessage : styles.botMessage,
-            ]}
-          >
-            {msg.sender === 'bot' ? renderFormattedText(msg.text) : (
-              <Text style={[styles.messageText, msg.sender === 'user' ? styles.userMessageText : styles.botMessageText]}>
-                {msg.text}
-              </Text>
-            )}
-          </View>
-        ))}
+        {messages.length === 0 ? (
+          <EmptyChatMessage />
+        ) : (
+          messages.map((msg, index) => (
+            <View
+              key={index}
+              style={[
+                styles.message,
+                msg.sender === 'user' ? styles.userMessage : styles.botMessage,
+              ]}
+            >
+              {msg.sender === 'bot' ? renderFormattedText(msg.text) : (
+                <Text style={[styles.messageText, msg.sender === 'user' ? styles.userMessageText : styles.botMessageText]}>
+                  {msg.text}
+                </Text>
+              )}
+            </View>
+          ))
+        )}
         {isLoading && (
           <View style={styles.typingIndicator}>
             <ActivityIndicator size="small" color="#007bff" />
@@ -133,91 +144,121 @@ const assistant = () => {
   );
 };
 
-export default assistant;
-
-
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#f5f5f5',
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 16,
-      backgroundColor: '#ffffff',
-      borderBottomWidth: 1,
-      borderBottomColor: '#e0e0e0',
-    },
-    headerText: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginLeft: 8,
-    },
-    chatContainer: {
-      flex: 1,
-      padding: 16,
-      marginBottom: 10,
-      paddingBottom: 100,
-    },
-    message: {
-      marginBottom: 10,
-      padding: 12,
-      marginVertical: 4,
-      borderRadius: 12,
-      maxWidth: '80%',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-    userMessage: {
-      alignSelf: 'flex-end',
-      backgroundColor: '#007bff',
-    },
-    botMessage: {
-      alignSelf: 'flex-start',
-      backgroundColor: '#ffffff',
-    },
-    messageText: {
-      fontSize: 16,
-    },
-    userMessageText: {
-      color: '#ffffff',
-    },
-    botMessageText: {
-      color: '#333333',
-    },
-    inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 16,
-      backgroundColor: '#ffffff',
-      borderTopWidth: 1,
-      borderTopColor: '#e0e0e0',
-      minHeight: 80,
-    },
-    input: {
-      flex: 1,
-      borderWidth: 1,
-      borderColor: '#e0e0e0',
-      borderRadius: 24,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      marginRight: 8,
-      backgroundColor: '#f5f5f5',
-    },
-    sendButton: {
-      backgroundColor: '#007bff',
-      borderRadius: 24,
-      padding: 12,
-    },
-    typingIndicator: {
-      alignSelf: 'flex-start',
-      padding: 8,
-      borderRadius: 12,
-      backgroundColor: '#ffffff',
-      marginVertical: 4,
-    },
-  });
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  chatContainer: {
+    flex: 1,
+    padding: 16,
+    marginBottom: 10,
+    paddingBottom: 100,
+  },
+  message: {
+    marginBottom: 10,
+    padding: 12,
+    marginVertical: 4,
+    borderRadius: 12,
+    maxWidth: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  userMessage: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#007bff',
+  },
+  botMessage: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#ffffff',
+  },
+  messageText: {
+    fontSize: 16,
+  },
+  userMessageText: {
+    color: '#ffffff',
+  },
+  botMessageText: {
+    color: '#333333',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    minHeight: 80,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginRight: 8,
+    backgroundColor: '#f5f5f5',
+  },
+  sendButton: {
+    backgroundColor: '#007bff',
+    borderRadius: 24,
+    padding: 12,
+  },
+  typingIndicator: {
+    alignSelf: 'flex-start',
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    marginVertical: 4,
+  },
+  emptyChatContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  dialogueBox: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 30,
+    width: '80%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  sloganText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  subText: {
+    fontSize: 16,
+    color: '#666666',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+});
+
+export default assistant;

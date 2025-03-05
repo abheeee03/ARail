@@ -21,6 +21,28 @@ export default function SearchResultsScreen() {
   const [error, setError] = useState(null);
   const [trains, setTrains] = useState([]);
 
+  const fetchStationLocation = async (stationCode) => {
+    try {
+      const apiKey = '3f82b58461ac24852bf6b16bd9ff52fd';
+      const response = await fetch(
+        `http://indianrailapi.com/api/v2/StationLocationOnMap/apikey/${apiKey}/StationCode/${stationCode}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      if (data.ResponseCode === "200" && data.Status === "SUCCESS") {
+        return data.URL;
+      }
+      return null;
+    } catch (err) {
+      console.error('Error fetching station location:', err);
+      return null;
+    }
+  };
+
   const fetchStationInfo = async (stationName, setStation) => {
     if (!stationName) {
       setError('Station name is required');
@@ -40,12 +62,14 @@ export default function SearchResultsScreen() {
       const data = await response.json();
       if (data.ResponseCode === "200" && data.Status === "SUCCESS" && data.Station && data.Station.length > 0) {
         const stationData = data.Station[0];
+        const locationUrl = await fetchStationLocation(stationData.StationCode);
         setStation({
           Name: stationData.NameEn,
           NameHn: stationData.NameHn,
           Code: stationData.StationCode,
           Latitude: stationData.Latitude,
-          Longitude: stationData.Longitude
+          Longitude: stationData.Longitude,
+          LocationUrl: locationUrl
         });
       } else {
         setError(`No station found for ${stationName}`);
@@ -57,33 +81,32 @@ export default function SearchResultsScreen() {
   };
 
   const openInMaps = (station) => {
-    if (!station.Latitude || !station.Longitude) {
+    if (station.LocationUrl) {
+      Linking.canOpenURL(station.LocationUrl).then(supported => {
+        if (supported) {
+          Linking.openURL(station.LocationUrl);
+        } else {
+          Alert.alert('Error', 'Unable to open Google Maps');
+        }
+      }).catch(err => {
+        console.error('Error opening Google Maps:', err);
+        Alert.alert('Error', 'Failed to open Google Maps');
+      });
+    } else if (station.Latitude && station.Longitude) {
+      const url = `https://www.google.com/maps/search/?api=1&query=${station.Latitude},${station.Longitude}`;
+      Linking.canOpenURL(url).then(supported => {
+        if (supported) {
+          Linking.openURL(url);
+        } else {
+          Alert.alert('Error', 'Unable to open Google Maps');
+        }
+      }).catch(err => {
+        console.error('Error opening Google Maps:', err);
+        Alert.alert('Error', 'Failed to open Google Maps');
+      });
+    } else {
       Alert.alert('Error', 'Station location data is missing');
-      return;
     }
-
-    const lat = parseFloat(station.Latitude);
-    const lng = parseFloat(station.Longitude);
-
-    if (isNaN(lat) || isNaN(lng)) {
-      Alert.alert('Error', 'Invalid station coordinates');
-      return;
-    }
-
-    console.log('Redirecting to coordinates:', { latitude: lat, longitude: lng });
-
-    const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-
-    Linking.canOpenURL(url).then(supported => {
-      if (supported) {
-        Linking.openURL(url);
-      } else {
-        Alert.alert('Error', 'Unable to open Google Maps');
-      }
-    }).catch(err => {
-      console.error('Error opening Google Maps:', err);
-      Alert.alert('Error', 'Failed to open Google Maps');
-    });
   };
 
   useEffect(() => {
@@ -146,13 +169,13 @@ export default function SearchResultsScreen() {
       <View style={styles.stationCard}>
         <View style={styles.stationInfo}>
           <Text style={styles.stationTitle}>{title}</Text>
-          <Text style={styles.stationName}>{station.Name || 'N/A'}</Text>
+          <Text style={styles.stationName}>{station.Name || <Text>N/A</Text>}</Text>
           {station.NameHn && (
             <Text style={styles.stationNameHn}>{station.NameHn}</Text>
           )}
-          <Text style={styles.stationCode}>{station.Code || 'N/A'}</Text>
+          <Text style={styles.stationCode}>{station.Code || <Text>N/A</Text>}</Text>
         </View>
-        {station.Latitude && station.Longitude && (
+        {(station.LocationUrl || (station.Latitude && station.Longitude)) && (
           <TouchableOpacity 
             style={styles.mapButton}
             onPress={() => openInMaps(station)}

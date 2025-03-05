@@ -1,108 +1,122 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
-import { auth } from '../../config/firebase';
-import { router } from 'expo-router';
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 
-export default function ProfileScreen() {
-  const user = auth.currentUser;
-
-  const handleSignOut = async () => {
-    try {
-      await auth.signOut();
-      router.replace('/auth/login');
-    } catch (error) {
-      console.error(error);
-    }
+const ProfileScreen = () => {
+  const user = {
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    joined: 'March 2024',
+    trips: 12,
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.profileHeader}>
-        <Image
-          source={{ uri: user?.photoURL }}
-          style={styles.profileImage}
-        />
-        <Text style={styles.name}>{user?.displayName}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
+    <ScrollView style={styles.container}>
+      {/* Profile Header */}
+      <View style={styles.header}>
+        <Text style={styles.name}>{user.name}</Text>
+        <Text style={styles.email}>{user.email}</Text>
       </View>
 
-      <View style={styles.settingsContainer}>
+      {/* Statistics Section */}
+      <View style={styles.section}>
+        <View style={styles.statItem}>
+          <Text style={styles.statNumber}>{user.trips}</Text>
+          <Text style={styles.statLabel}>Trips Taken</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={styles.statNumber}>{user.joined}</Text>
+          <Text style={styles.statLabel}>Member Since</Text>
+        </View>
+      </View>
+
+      {/* Settings Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Settings</Text>
         <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Edit Profile</Text>
+          <Text style={styles.settingText}>Notification Preferences</Text>
         </TouchableOpacity>
-        
         <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Notification Settings</Text>
+          <Text style={styles.settingText}>Privacy Settings</Text>
         </TouchableOpacity>
-        
         <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Privacy Policy</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Terms of Service</Text>
+          <Text style={styles.settingText}>Language</Text>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity
-        style={styles.signOutButton}
-        onPress={handleSignOut}
-      >
-        <Text style={styles.signOutText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
+      {/* App Info Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>About Rail Rover</Text>
+        <Text style={styles.infoText}>Version 1.0.0</Text>
+        <Text style={styles.infoText}> 2024 Rail Rover</Text>
+      </View>
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#fff',
   },
-  profileHeader: {
+  header: {
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    paddingVertical: 30,
+    backgroundColor: '#007AFF',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 5,
+    color: '#fff',
   },
   email: {
     fontSize: 16,
+    color: '#f0f0f0',
+  },
+  section: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#007AFF',
+  },
+  statItem: {
+    alignItems: 'center',
+    marginHorizontal: 20,
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#007AFF',
+  },
+  statLabel: {
+    fontSize: 14,
     color: '#666',
   },
-  settingsContainer: {
-    marginTop: 20,
-    backgroundColor: 'white',
-  },
   settingItem: {
-    padding: 15,
+    paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#f0f0f0',
   },
   settingText: {
     fontSize: 16,
   },
-  signOutButton: {
-    margin: 20,
-    backgroundColor: '#ff3b30',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  signOutText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+  infoText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 10,
   },
 });
+
+export default ProfileScreen;

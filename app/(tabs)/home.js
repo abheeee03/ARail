@@ -78,6 +78,17 @@ export default function HomeScreen() {
     });
   };
 
+  const handleARButtonClick = () => {
+    const arAppUrl = 'RailRoverAR://start-ar';
+    Linking.canOpenURL(arAppUrl).then(supported => {
+      if (supported) {
+        Linking.openURL(arAppUrl);
+      } else {
+        Alert.alert('AR App not installed');
+      }
+    });
+  };
+
   const QuickActionButton = ({ icon, title, subtitle, onPress }) => (
     <TouchableOpacity style={styles.quickActionButton} onPress={onPress}>
       {icon}
@@ -91,8 +102,8 @@ export default function HomeScreen() {
       {/* Blue Header Section */}
       <View style={styles.headerSection}>
         <View style={styles.profileSection}>
-          <Text style={styles.greeting}>Welcome 👋</Text>
-          <Text style={styles.userName}>User Name Here</Text>
+          <Text style={styles.greeting}>Welcome to 👋</Text>
+          <Text style={[styles.userName, {fontSize: 27}]}>Rail Rover</Text>
         </View>
       </View>
 
@@ -158,12 +169,14 @@ export default function HomeScreen() {
             />
             <QuickActionButton 
               icon={<MaterialCommunityIcons name="train-car" size={24} color="#007AFF" />}
-              title="Facilities On Station"
+              title="View All Trains On Station"
+              onPress={() => router.push('/station-trains')}
             />
             
           </View>
           <View style={styles.quickActionsRow}>
           <QuickActionButton 
+          onPress={() => router.push('/food')}
               icon={<MaterialCommunityIcons name="food" size={24} color="#007AFF" />}
               title="Order Food"
             />
@@ -173,12 +186,15 @@ export default function HomeScreen() {
               onPress={() => router.push('/schedule')}
             />
             <QuickActionButton 
+            onPress={() => router.push('/LiveTrain')}
               icon={<MaterialCommunityIcons name="train" size={24} color="#007AFF" />}
-              title="Train Live"
+              title="Track Train Live"
             />
           </View>
             <TouchableOpacity
-            style={styles.searchButton}>
+            style={styles.searchButton}
+            onPress={handleARButtonClick}
+            >
               <Text style={styles.searchButtonText}>View Current Station In AR</Text>
             
           </TouchableOpacity>
@@ -196,7 +212,7 @@ const styles = StyleSheet.create({
   headerSection: {
     height: '50%',
     backgroundColor: '#007AFF',
-    paddingTop: 30,
+    paddingTop: 18,
     paddingHorizontal: 20,
   },
   profileSection: {
@@ -220,7 +236,7 @@ const styles = StyleSheet.create({
   },
   inputCard: {
     backgroundColor: '#fff',
-    marginTop: -190,
+    marginTop: -200,
     marginHorizontal: 20,
     borderRadius: 16,
     padding: 20,

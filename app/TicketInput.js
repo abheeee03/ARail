@@ -10,7 +10,6 @@ export default function TicketInputScreen() {
       Alert.alert('Error', 'Please enter a ticket number');
       return;
     }
-    // Navigate to the ticket map screen with the ticket number
     router.push({
       pathname: '/SeatMap',
       params: { ticketNumber },

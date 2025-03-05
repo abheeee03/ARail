@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ImageBackground, TouchableOpacity, Dimensions, FlatList } from 'react-native';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
 
 const images = [
   require('../../assets/images/train1.jpg'),
@@ -78,13 +78,11 @@ export default function LoginScreen() {
         <Text style={[styles.title, { color: 'black' }]}>RailRover</Text>
         <Text style={[styles.description, { color: 'black' }]}>Transform Your Travel Experience with Accurate Train Schedules, Real-Time Alerts, and Effortless Navigation!
         </Text>
-        
         <Link
           href="/(tabs)/home"
           style={styles.googleButton}
-          onPress={() => {/* Handle Google Sign In */}}
         >
-          <Text style={styles.googleButtonText}>Sign in with Google</Text>
+          <Text style={styles.googleButtonText}>Get Started</Text>
         </Link>
       </View>
     </View>

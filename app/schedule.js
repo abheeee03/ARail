@@ -10,7 +10,7 @@ import {
   FlatList,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 export default function ScheduleScreen() {
   const [trainNumber, setTrainNumber] = useState('');
@@ -97,6 +97,12 @@ export default function ScheduleScreen() {
             <Text style={styles.searchButtonText}>Search</Text>
           )}
         </TouchableOpacity>
+      </View>
+
+      <View style={{ alignItems: 'center', marginTop: 10 }}>
+        <Link href="/TrainSearch">
+          <Text style={{ color: '#007bff', fontWeight: 'bold', fontFamily: 'Poppins-Regular' }}>Don't Remember? Find Train Number</Text>
+        </Link>
       </View>
 
       {error && (
