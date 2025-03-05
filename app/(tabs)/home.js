@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView, Linking, Alert } from 'react-native';
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
+import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
 export default function HomeScreen() {
   const [startPoint, setStartPoint] = useState('');
   const [endPoint, setEndPoint] = useState('');
   const [loading, setLoading] = useState(false);
   const [nearestStation, setNearestStation] = useState(null);
+  const [tripType, setTripType] = useState('one-way');
+  const [date, setDate] = useState('');
+  const [trainClass, setTrainClass] = useState('');
+  const [passengers, setPassengers] = useState('0 Adult');
 
   const findNearestStation = async () => {
     setLoading(true);
@@ -41,8 +46,28 @@ export default function HomeScreen() {
     }
   };
 
+  const handleHelplineCall = async () => {
+    try {
+      await Linking.openURL('tel:139');
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Could not open phone dialer. Please dial 139 manually.",
+        [{ text: "OK" }]
+      );
+    }
+  };
+
+  const QuickActionButton = ({ icon, title, subtitle, onPress }) => (
+    <TouchableOpacity style={styles.quickActionButton} onPress={onPress}>
+      {icon}
+      <Text style={styles.quickActionTitle}>{title}</Text>
+      {subtitle && <Text style={styles.quickActionSubtitle}>{subtitle}</Text>}
+    </TouchableOpacity>
+  );
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Blue Header Section */}
       <View style={styles.headerSection}>
         <View style={styles.profileSection}>
@@ -55,8 +80,10 @@ export default function HomeScreen() {
       <View style={styles.contentSection}>
         {/* Elevated Input Card */}
         <View style={styles.inputCard}>
-              <Text style={styles.tripTypeTextActive}>Search Stations</Text>
-        
+          {/* Trip Type Selector */}
+          <View style={styles.tripTypeSelector}>
+              <Text style={[styles.tripTypeText, tripType === 'one-way' && styles.tripTypeTextActive]}>Search Stations</Text>
+          </View>
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Origin</Text>
@@ -82,18 +109,66 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             style={styles.searchButton}
-            onPress={findNearestStation}
+            onPress={() => {
+              if (startPoint && endPoint) {
+                router.push({
+                  pathname: '/search-results',
+                  params: {
+                    origin: startPoint,
+                    destination: endPoint
+                  }
+                });
+              } else {
+                Alert.alert('Error', 'Please enter both origin and destination stations');
+              }
+            }}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="white" />
             ) : (
-              <Text style={styles.searchButtonText}>Search Stations</Text>
+              <Text style={styles.searchButtonText}>Search Train & Station</Text>
             )}
           </TouchableOpacity>
         </View>
+
+        {/* Quick Actions Grid */}
+        <View style={styles.quickActionsGrid}>
+          <View style={styles.quickActionsRow}>
+            <QuickActionButton 
+              icon={<MaterialCommunityIcons name="phone" size={24} color="#007AFF" />}
+              title="Railway Helpline"
+              onPress={handleHelplineCall}
+            />
+            <QuickActionButton 
+              icon={<MaterialCommunityIcons name="ticket-confirmation" size={24} color="#007AFF" />}
+              title="Check Ticket"
+            />
+            <QuickActionButton 
+              icon={<MaterialCommunityIcons name="train-car" size={24} color="#007AFF" />}
+              title="Facilities On Station"
+            />
+            
+          </View>
+          <View style={styles.quickActionsRow}>
+          <QuickActionButton 
+              icon={<MaterialCommunityIcons name="food" size={24} color="#007AFF" />}
+              title="Order Food"
+            />
+          <QuickActionButton 
+              icon={<MaterialCommunityIcons name="calendar" size={24} color="#007AFF" />}
+              title="Train Schedule"
+              onPress={() => router.push('/schedule')}
+            />
+            <QuickActionButton 
+              icon={<MaterialCommunityIcons name="train" size={24} color="#007AFF" />}
+              title="Train Live"
+            />
+            
+          </View>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -125,10 +200,11 @@ const styles = StyleSheet.create({
   contentSection: {
     flex: 1,
     backgroundColor: '#f8f8f8',
+    paddingBottom: 20,
   },
   inputCard: {
     backgroundColor: '#fff',
-    marginTop: -210,
+    marginTop: -150,
     marginHorizontal: 20,
     borderRadius: 16,
     padding: 20,
@@ -141,10 +217,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
+  tripTypeSelector: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  tripTypeButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  tripTypeButtonActive: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#007AFF',
+  },
+  tripTypeText: {
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'Poppins-Medium',
+  },
   tripTypeTextActive: {
-    marginBottom: 10,
     color: '#007AFF',
-    fontSize: 20,
     fontFamily: 'Poppins-Bold',
   },
   inputGroup: {
@@ -164,6 +258,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Poppins-Regular',
   },
+  inputText: {
+    color: '#666',
+    fontSize: 16,
+    fontFamily: 'Poppins-Regular',
+  },
+  rowInputs: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   searchButton: {
     backgroundColor: '#007AFF',
     paddingVertical: 16,
@@ -175,5 +278,43 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontFamily: 'Poppins-Bold',
+  },
+  quickActionsGrid: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  quickActionButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f6ff',
+    borderRadius: 12,
+    padding: 8,
+    width: '25%',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  quickActionTitle: {
+    fontSize: 12,
+    color: '#333',
+    fontFamily: 'Poppins-Medium',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  quickActionSubtitle: {
+    fontSize: 10,
+    color: '#666',
+    fontFamily: 'Poppins-Regular',
+    textAlign: 'center',
   },
 });

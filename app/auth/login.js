@@ -75,9 +75,9 @@ export default function LoginScreen() {
 
       {/* Bottom Division - Content */}
       <View style={styles.contentContainer}>
-        <Text style={styles.title}>ARail</Text>
-        <Text style={styles.subtitle}>Sri Lanka's first train app</Text>
-        <Text style={styles.description}>The Sri Lanka Railway Department is Sri Lanka's railway owner and primary operator.</Text>
+        <Text style={[styles.title, { color: 'black' }]}>RailRover</Text>
+        <Text style={[styles.description, { color: 'black' }]}>Transform Your Travel Experience with Accurate Train Schedules, Real-Time Alerts, and Effortless Navigation!
+        </Text>
         
         <Link
           href="/(tabs)/home"
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   carouselContainer: {
-    height: '60%',
+    height: '50%',
     backgroundColor: '#000',
   },
   slideContainer: {
@@ -109,10 +109,13 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   contentContainer: {
-    height: '40%',
-    backgroundColor: '#1a1a1a',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    gap: 10,
+    height: '50%',
+    backgroundColor: 'white',
     padding: 20,
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
   },
   pagination: {
@@ -156,7 +159,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
   },
   googleButton: {
-    backgroundColor: 'white',
+    backgroundColor: '#007AFF',
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 24,
@@ -165,9 +168,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   googleButtonText: {
-    color: '#333',
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-Bold',
   },
 });
