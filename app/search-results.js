@@ -22,39 +22,103 @@ export default function SearchResultsScreen() {
   const [trains, setTrains] = useState([]);
 
   const fetchStationInfo = async (stationName, setStation) => {
+    if (!stationName) {
+      setError('Station name is required');
+      return;
+    }
+
     try {
+      const apiKey = '3f82b58461ac24852bf6b16bd9ff52fd';
       const response = await fetch(
-        `http://indianrailapi.com/api/v2/AutoCompleteStation/apikey/3f82b58461ac24852bf6b16bd9ff52fd/StationCodeOrName/${stationName}`
+        `http://indianrailapi.com/api/v2/AutoCompleteStation/apikey/${apiKey}/StationCodeOrName/${encodeURIComponent(stationName)}`
       );
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
       const data = await response.json();
-      if (data.ResponseCode === "200" && data.Status === "SUCCESS") {
-        setStation(data.Station[0]);
+      if (data.ResponseCode === "200" && data.Status === "SUCCESS" && data.Station && data.Station.length > 0) {
+        const stationData = data.Station[0];
+        setStation({
+          Name: stationData.NameEn,
+          NameHn: stationData.NameHn,
+          Code: stationData.StationCode,
+          Latitude: stationData.Latitude,
+          Longitude: stationData.Longitude
+        });
+      } else {
+        setError(`No station found for ${stationName}`);
       }
     } catch (err) {
+      console.error('Error fetching station:', err);
       setError('Failed to fetch station information');
     }
   };
 
   const openInMaps = (station) => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${station.Latitude},${station.Longitude}`;
-    Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'Could not open maps');
+    if (!station.Latitude || !station.Longitude) {
+      Alert.alert('Error', 'Station location data is missing');
+      return;
+    }
+
+    const lat = parseFloat(station.Latitude);
+    const lng = parseFloat(station.Longitude);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      Alert.alert('Error', 'Invalid station coordinates');
+      return;
+    }
+
+    console.log('Redirecting to coordinates:', { latitude: lat, longitude: lng });
+
+    const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+
+    Linking.canOpenURL(url).then(supported => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        Alert.alert('Error', 'Unable to open Google Maps');
+      }
+    }).catch(err => {
+      console.error('Error opening Google Maps:', err);
+      Alert.alert('Error', 'Failed to open Google Maps');
     });
   };
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setError(null);
+
+      if (!origin || !destination) {
+        setError('Both origin and destination stations are required');
+        setLoading(false);
+        return;
+      }
+
       try {
         await Promise.all([
           fetchStationInfo(origin, setOriginStation),
           fetchStationInfo(destination, setDestinationStation)
         ]);
-        // Here you would also fetch trains between stations
-        // For now using dummy data
+
+        // Fetch trains between stations (dummy data for now)
         setTrains([
-          { number: '12345', name: 'Express Train 1', departure: '10:00', arrival: '16:00' },
-          { number: '67890', name: 'Super Fast 2', departure: '14:00', arrival: '20:00' },
+          { 
+            number: '12345', 
+            name: 'Rajdhani Express', 
+            departure: '06:00', 
+            arrival: '14:00',
+            type: 'SUF'
+          },
+          { 
+            number: '67890', 
+            name: 'Shatabdi Express', 
+            departure: '08:00', 
+            arrival: '16:00',
+            type: 'SUF'
+          },
         ]);
       } catch (err) {
         setError('Failed to fetch data');
@@ -66,22 +130,40 @@ export default function SearchResultsScreen() {
     fetchData();
   }, [origin, destination]);
 
-  const StationCard = ({ station, title }) => (
-    <View style={styles.stationCard}>
-      <View style={styles.stationInfo}>
-        <Text style={styles.stationTitle}>{title}</Text>
-        <Text style={styles.stationName}>{station?.NameEn}</Text>
-        <Text style={styles.stationCode}>{station?.StationCode}</Text>
+  const StationCard = ({ station, title }) => {
+    if (!station) {
+      return (
+        <View style={styles.stationCard}>
+          <View style={styles.stationInfo}>
+            <Text style={styles.stationTitle}>{title}</Text>
+            <Text style={styles.errorText}>Station information not available</Text>
+          </View>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.stationCard}>
+        <View style={styles.stationInfo}>
+          <Text style={styles.stationTitle}>{title}</Text>
+          <Text style={styles.stationName}>{station.Name || 'N/A'}</Text>
+          {station.NameHn && (
+            <Text style={styles.stationNameHn}>{station.NameHn}</Text>
+          )}
+          <Text style={styles.stationCode}>{station.Code || 'N/A'}</Text>
+        </View>
+        {station.Latitude && station.Longitude && (
+          <TouchableOpacity 
+            style={styles.mapButton}
+            onPress={() => openInMaps(station)}
+          >
+            <MaterialCommunityIcons name="map-marker" size={24} color="#007AFF" />
+            <Text style={styles.mapButtonText}>View on Map</Text>
+          </TouchableOpacity>
+        )}
       </View>
-      <TouchableOpacity 
-        style={styles.mapButton}
-        onPress={() => openInMaps(station)}
-      >
-        <MaterialCommunityIcons name="map-marker" size={24} color="#007AFF" />
-        <Text style={styles.mapButtonText}>View on Map</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    );
+  };
 
   const TrainItem = ({ train }) => (
     <View style={styles.trainCard}>
@@ -211,6 +293,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#333',
     fontFamily: 'Poppins-Bold',
+    marginBottom: 4,
+  },
+  stationNameHn: {
+    fontSize: 14,
+    color: '#666',
+    fontFamily: 'Poppins-Regular',
     marginBottom: 4,
   },
   stationCode: {

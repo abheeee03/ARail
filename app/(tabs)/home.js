@@ -13,6 +13,7 @@ export default function HomeScreen() {
   const [date, setDate] = useState('');
   const [trainClass, setTrainClass] = useState('');
   const [passengers, setPassengers] = useState('0 Adult');
+  const [showValidation, setShowValidation] = useState(false);
 
   const findNearestStation = async () => {
     setLoading(true);
@@ -58,6 +59,25 @@ export default function HomeScreen() {
     }
   };
 
+  const handleSearch = () => {
+    const trimmedStart = startPoint.trim();
+    const trimmedEnd = endPoint.trim();
+
+    if (!trimmedStart || !trimmedEnd) {
+      setShowValidation(true);
+      Alert.alert('Error', 'Please enter both origin and destination stations');
+      return;
+    }
+
+    router.push({
+      pathname: '/search-results',
+      params: {
+        origin: trimmedStart,
+        destination: trimmedEnd
+      }
+    });
+  };
+
   const QuickActionButton = ({ icon, title, subtitle, onPress }) => (
     <TouchableOpacity style={styles.quickActionButton} onPress={onPress}>
       {icon}
@@ -88,40 +108,30 @@ export default function HomeScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Origin</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, showValidation && !startPoint.trim() && styles.inputError]}
               placeholder="Enter starting point"
               value={startPoint}
-              onChangeText={setStartPoint}
+              onChangeText={(text) => setStartPoint(text.trim())}
               placeholderTextColor="#999"
             />
+            {showValidation && !startPoint.trim() && <Text style={styles.errorText}>Origin station is required</Text>}
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Destination</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, showValidation && !endPoint.trim() && styles.inputError]}
               placeholder="Enter destination"
               value={endPoint}
-              onChangeText={setEndPoint}
+              onChangeText={(text) => setEndPoint(text.trim())}
               placeholderTextColor="#999"
             />
+            {showValidation && !endPoint.trim() && <Text style={styles.errorText}>Destination station is required</Text>}
           </View>
 
           <TouchableOpacity
-            style={styles.searchButton}
-            onPress={() => {
-              if (startPoint && endPoint) {
-                router.push({
-                  pathname: '/search-results',
-                  params: {
-                    origin: startPoint,
-                    destination: endPoint
-                  }
-                });
-              } else {
-                Alert.alert('Error', 'Please enter both origin and destination stations');
-              }
-            }}
+            style={[styles.searchButton, (loading || !startPoint.trim() || !endPoint.trim()) && styles.searchButtonDisabled]}
+            onPress={handleSearch}
             disabled={loading}
           >
             {loading ? (
@@ -135,14 +145,16 @@ export default function HomeScreen() {
         {/* Quick Actions Grid */}
         <View style={styles.quickActionsGrid}>
           <View style={styles.quickActionsRow}>
+            <TouchableOpacity
+              style={styles.quickActionButton}
+              onPress={() => router.push('/TicketInput')}>
+              <MaterialCommunityIcons name="ticket-confirmation" size={24} color="#007AFF" />
+              <Text style={styles.quickActionTitle}>View Ticket</Text>
+            </TouchableOpacity>
             <QuickActionButton 
               icon={<MaterialCommunityIcons name="phone" size={24} color="#007AFF" />}
               title="Railway Helpline"
               onPress={handleHelplineCall}
-            />
-            <QuickActionButton 
-              icon={<MaterialCommunityIcons name="ticket-confirmation" size={24} color="#007AFF" />}
-              title="Check Ticket"
             />
             <QuickActionButton 
               icon={<MaterialCommunityIcons name="train-car" size={24} color="#007AFF" />}
@@ -164,8 +176,12 @@ export default function HomeScreen() {
               icon={<MaterialCommunityIcons name="train" size={24} color="#007AFF" />}
               title="Train Live"
             />
-            
           </View>
+            <TouchableOpacity
+            style={styles.searchButton}>
+              <Text style={styles.searchButtonText}>View Current Station In AR</Text>
+            
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
@@ -178,7 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   headerSection: {
-    height: '40%',
+    height: '50%',
     backgroundColor: '#007AFF',
     paddingTop: 30,
     paddingHorizontal: 20,
@@ -204,7 +220,7 @@ const styles = StyleSheet.create({
   },
   inputCard: {
     backgroundColor: '#fff',
-    marginTop: -150,
+    marginTop: -190,
     marginHorizontal: 20,
     borderRadius: 16,
     padding: 20,
@@ -274,6 +290,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
   },
+  searchButtonDisabled: {
+    backgroundColor: '#cccccc',
+  },
   searchButtonText: {
     color: '#fff',
     fontSize: 16,
@@ -316,5 +335,14 @@ const styles = StyleSheet.create({
     color: '#666',
     fontFamily: 'Poppins-Regular',
     textAlign: 'center',
+  },
+  inputError: {
+    borderColor: '#ff4444',
+  },
+  errorText: {
+    color: '#ff4444',
+    fontSize: 12,
+    marginTop: 4,
+    fontFamily: 'Poppins-Regular',
   },
 });

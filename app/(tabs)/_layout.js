@@ -23,6 +23,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="OurTeam"
+        options={{
+          title: 'Our Team',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="users" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
