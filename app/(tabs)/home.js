@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, ScrollView, Linking, Alert } from 'react-native';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import * as Location from 'expo-location';
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
@@ -101,6 +101,9 @@ export default function HomeScreen() {
     <ScrollView style={styles.container}>
       {/* Blue Header Section */}
       <View style={styles.headerSection}>
+        <Link href='/alerts' style={{position: 'absolute', left: '99%', top: 25}}>
+        <MaterialCommunityIcons name="bell" size={32} color="#fff" style={{fontSize: 25}}/>
+        </Link>
         <View style={styles.profileSection}>
           <Text style={styles.greeting}>Welcome to 👋</Text>
           <Text style={[styles.userName, {fontSize: 27}]}>Rail Rover</Text>
@@ -159,8 +162,8 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.quickActionButton}
               onPress={() => router.push('/TicketInput')}>
-              <MaterialCommunityIcons name="ticket-confirmation" size={24} color="#007AFF" />
-              <Text style={styles.quickActionTitle}>View Ticket</Text>
+              <MaterialCommunityIcons name="alert" size={24} color="#007AFF" />
+              <Text style={[styles.quickActionTitle, {color: 'red'}]}>Emergency Alert</Text>
             </TouchableOpacity>
             <QuickActionButton 
               icon={<MaterialCommunityIcons name="phone" size={24} color="#007AFF" />}
